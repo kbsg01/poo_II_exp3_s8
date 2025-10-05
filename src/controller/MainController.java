@@ -17,8 +17,11 @@ import view.*;
  *
  * Patrón: Controller en arquitectura MVC
  */
+import java.util.logging.Logger;
+
 public class MainController {
 
+    private static final Logger logger = Logger.getLogger(MainController.class.getName());
     private final MainFrame view;           // Referencia a la vista principal
     private final PeliculaService service;  // Referencia al servicio de negocio
     private final AtomicBoolean saving = new AtomicBoolean(false);  // Control de concurrencia
@@ -137,6 +140,15 @@ public class MainController {
             listarPanel.limpiarFiltros();
             onListarTodas();
         });
+
+        listarPanel.getTable().getRowSorter().addRowSorterListener(e -> {
+            if (e.getType() == javax.swing.event.RowSorterEvent.Type.SORT_ORDER_CHANGED) {
+                System.out.println("Ordenamiento cambiado");
+                // Actualizar contador después del ordenamiento
+                listarPanel.actualizarContador(listarPanel.getTable().getRowCount());
+            }
+        });
+
     }
 
     /**
@@ -375,8 +387,7 @@ public class MainController {
             view.getListarPanel().cargarPeliculas(peliculas);
             System.out.println("Cargadas " + peliculas.size() + " películas en la tabla");
         } catch (Exception ex) {
-            System.err.println("Error al cargar películas: " + ex.getMessage());
-            ex.printStackTrace();
+            logger.severe("Error al cargar películas: " + ex.getMessage());
             JOptionPane.showMessageDialog(view, "Error al cargar películas: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);
         }

@@ -1,7 +1,7 @@
 package app;
 
 import controller.MainController;
-import dao.DatabaseConnection;
+import db.DatabaseConnection;
 import dao.PeliculaDAO;
 import javax.swing.*;
 import service.PeliculaService;

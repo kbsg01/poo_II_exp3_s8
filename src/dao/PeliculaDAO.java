@@ -1,5 +1,6 @@
 package dao;
 
+import db.DatabaseConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

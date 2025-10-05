@@ -70,10 +70,10 @@ public class PeliculaService {
         }
     }
 
-    /*
-        Busca una película por ID
-        @param id ID de la película a buscar
-
+    /**
+    *   Busca una película por ID
+    *   @param id ID de la película a buscar
+    *   
     */
     public Pelicula findById(int id) throws Exception {
         if (id <= 0) {
@@ -100,38 +100,52 @@ public class PeliculaService {
      * @return Lista de películas filtradas
      * @throws SQLException Si ocurre un error en la consulta
      */
-    public List<Pelicula> findWithFilters(String genero, int anioDesde, int anioHasta) throws SQLException {
-        System.out.println("Aplicando filtros - Género: " + genero + ", Años: " + anioDesde + "-" + anioHasta);
+public List<Pelicula> findWithFilters(String genero, int anioDesde, int anioHasta) throws Exception {
+    System.out.println("Aplicando filtros - Género: " + genero + ", Años: " + anioDesde + "-" + anioHasta);
 
-        List<Pelicula> resultado = List.of(); 
-        try {
-            List<Pelicula> todasLasPeliculas = dao.findAll();
-            System.out.println("Total películas en BD: " + todasLasPeliculas.size());
-    
-            resultado = todasLasPeliculas.stream()
-                    .filter(p -> {
-                        // Filtro por género (si no es "TODOS")
-                        boolean generoMatch = "TODOS".equals(genero) || p.getGenero().toString().equals(genero);
-    
-                        // Filtro por rango de años
-                        boolean anioMatch = p.getAnio() >= anioDesde && p.getAnio() <= anioHasta;
-    
-                        // DEBUG: Imprimir cada película que se evalúa
-                        System.out.println("Película: " + p.getTitulo() + " - Género: " + p.getGenero()
-                                + " (" + generoMatch + "), Año: " + p.getAnio() + " (" + anioMatch + ")");
-    
-                        return generoMatch && anioMatch;
-                    })
-                    .collect(Collectors.toList());
-        } catch (SQLException e) {
+    try {
+        List<Pelicula> todasLasPeliculas = dao.findAll();
+        System.out.println("Total películas en BD: " + todasLasPeliculas.size());
+
+        List<Pelicula> resultado = todasLasPeliculas.stream()
+                .filter(p -> {
+                    // Filtro por género - flexible
+                    boolean generoMatch;
+                    if ("Todos".equals(genero)) {
+                        generoMatch = true; // Si es "TODOS", acepta cualquier género
+                    } else {
+                        generoMatch = p.getGenero().toString().equals(genero);
+                    }
+                    
+                    // Filtro por rango de años - flexible
+                    boolean anioMatch;
+                    if (anioDesde == 1900 && anioHasta == 2030) {
+                        anioMatch = true; // Rango completo = sin filtro de año
+                    } else {
+                        anioMatch = p.getAnio() >= anioDesde && p.getAnio() <= anioHasta;
+                    }
+                    
+                    // DEBUG: Imprimir evaluación
+                    System.out.println("Película: " + p.getTitulo() + 
+                        " - Género: " + p.getGenero() + " (" + generoMatch + ")" +
+                        ", Año: " + p.getAnio() + " (" + anioMatch + ")" +
+                        " - Resultado: " + (generoMatch && anioMatch));
+                    
+                    return generoMatch && anioMatch;
+                })
+                .collect(Collectors.toList());
+
+            System.out.println("Películas filtradas: " + resultado.size());
+            return resultado;
+            
+        } catch (Exception e) {
+            System.err.println("Error al filtrar películas: " + e.getMessage());
             e.printStackTrace();
+            throw e;
         }
-
-        System.out.println("Películas filtradas: " + resultado.size());
-        return resultado;
     }
-
-    public List<Pelicula> findByTitle(String query) throws Exception {
+    
+        public List<Pelicula> findByTitle(String query) throws Exception {
         if (query == null || query.trim().isEmpty()) {
             throw new IllegalArgumentException("El término de búsqueda no puede estar vacío.");
         }
